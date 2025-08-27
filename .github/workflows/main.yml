@@ -1,0 +1,42 @@
+name: Build Android APK # نام این workflow
+
+# رویدادهای (Events) محرک اجرای workflow
+on:
+  push:
+    branches: [ main ] # با هر Push به شاخه اصلی (main)
+  pull_request:
+    branches: [ main ] # یا با هر Pull Request به شاخه اصلی
+  workflow_dispatch: # همچنین امکان اجرای دستی از تب Actions را فراهم می‌کند
+
+# شغل‌های (Jobs) این workflow
+jobs:
+  build: #定义一个名为 build 的任务
+    runs-on: ubuntu-latest # روی آخرین نسخه Ubuntu اجرا شود
+
+    steps:
+      # قدم ۱: checkout (برداشت کد) - کد ریپازیتوری را دانلود می‌کند
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # قدم ۲: Setup JDK (تنظیم محیط جاوا)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # قدم ۳: Setup Android SDK (تنظیم محیط اندروید)
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # قدم ۴: Build APK (ساخت apk)
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug # این دستور برای ساخت نسخه دیباگ است
+
+      # قدم ۵: Upload APK artifact (آپلود apk به عنوان یک artifact)
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug # نام artifact
+          path: app/build/outputs/apk/debug/app-debug.apk # مسیر فایل apk
+          # نکته: مسیر 'app/' ممکن است بسته به نام ماژول شما تغییر کند.
